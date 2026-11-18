@@ -2,7 +2,7 @@
 // ================= Mulai: latar, tombol keyboard, dan layar pertama =================
 
 UI.init();
-Speech.init();
+try { Speech.init(); } catch { Speech.ok = false; }
 
 // suara baru boleh nyala setelah ada sentuhan, klik, atau tombol ditekan
 const wake = () => Sound.init();

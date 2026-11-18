@@ -186,15 +186,17 @@ const Sound = {
 // ================= Suara baca (Web Speech API) =================
 const Speech = {
   voice: null,
-  ok: typeof window !== 'undefined' && 'speechSynthesis' in window,
+  ok: typeof window !== 'undefined' && !!window.speechSynthesis && typeof window.SpeechSynthesisUtterance === 'function',
   init() {
     if (!this.ok) return;
-    const pickVoice = () => {
-      const vs = speechSynthesis.getVoices();
-      this.voice = vs.find((v) => /^id(-|_|$)/i.test(v.lang)) || vs.find((v) => /indones/i.test(v.name)) || null;
-    };
-    pickVoice();
-    speechSynthesis.onvoiceschanged = pickVoice;
+    try {
+      const pickVoice = () => {
+        const vs = speechSynthesis.getVoices() || [];
+        this.voice = vs.find((v) => /^id(-|_|$)/i.test(v.lang)) || vs.find((v) => /indones/i.test(v.name)) || null;
+      };
+      pickVoice();
+      speechSynthesis.onvoiceschanged = pickVoice;
+    } catch { this.ok = false; }
   },
   say(text) {
     if (!this.ok || !Save.data.settings.voice) return;

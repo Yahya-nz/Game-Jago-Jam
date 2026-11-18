@@ -224,17 +224,20 @@ function openSettings() {
     <div class="modal-btns"><button class="btn go" data-act="close">Tutup</button></div>
   </div></div>`);
   document.body.appendChild(bg);
+  UI.lockBehind(true);
   $('#set-music', bg).addEventListener('change', (e) => { Sound.init(); Sound.setMusic(e.target.checked); });
   $('#set-sfx', bg).addEventListener('change', (e) => { Sound.init(); Sound.setSfx(e.target.checked); });
   $('#set-voice', bg).addEventListener('change', (e) => { st.voice = e.target.checked; Save.save(); if (!st.voice) Speech.stop(); });
   $('#set-helper', bg).addEventListener('change', (e) => { st.helper = e.target.checked; Save.save(); });
   bg.addEventListener('click', async (e) => {
+    if (e.target === bg) { $('[data-act="close"]', bg).click(); return; }
     const b = e.target.closest('[data-act]');
     if (!b) return;
     Sound.tap();
-    if (b.dataset.act === 'close') { bg.remove(); UI.go('home', {}, { replace: true }); }
+    if (b.dataset.act === 'close') { bg.remove(); UI.lockBehind(false); UI.go('home', {}, { replace: true }); }
     if (b.dataset.act === 'reset') {
       bg.remove();
+      UI.lockBehind(false);
       const i = await UI.modal({ title: 'Hapus kemajuan?', body: '<p>Semua bintang, nilai tes, dan koleksi jam akan hilang.</p>', buttons: [{ label: 'Hapus', cls: 'danger' }, { label: 'Batal', cls: 'go' }] });
       if (i === 0) {
         const settings = Save.data.settings;

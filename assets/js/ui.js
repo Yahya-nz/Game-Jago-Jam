@@ -75,13 +75,21 @@ const UI = {
   },
 
   // jendela kecil dengan tombol pilihan
+  // halaman di belakang jendela dibuat inert supaya fokus keyboard tetap di jendela
+  lockBehind(on) {
+    const app = $('#app');
+    if (!app) return;
+    if (on) { this._opener = document.activeElement; app.inert = true; }
+    else { app.inert = false; if (this._opener && this._opener.isConnected) this._opener.focus({ preventScroll: true }); this._opener = null; }
+  },
   modal({ title, body, buttons }) {
     return new Promise((res) => {
       const bg = this.el(`<div class="modal-bg"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-t">
         <h2 id="modal-t">${title}</h2><div class="modal-body">${body}</div>
         <div class="modal-btns">${buttons.map((b, i) => `<button class="btn ${b.cls || ''}" data-i="${i}">${b.label}</button>`).join('')}</div></div></div>`);
       document.body.appendChild(bg);
-      const done = (i) => { bg.remove(); res(i); };
+      UI.lockBehind(true);
+      const done = (i) => { bg.remove(); UI.lockBehind(false); res(i); };
       bg.addEventListener('click', (e) => {
         const b = e.target.closest('[data-i]');
         if (b) { Sound.tap(); done(+b.dataset.i); }

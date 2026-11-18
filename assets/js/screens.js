@@ -168,7 +168,8 @@ const LESSONS = {
     { text: 'Satu hari ada 24 jam, jadi jarum pendek berputar dua kali dalam sehari.', t: 0, sky: 'malam' },
     { text: 'Putaran pertama dari tengah malam sampai siang: 00.00 sampai 11.59. Jago bangun jam lima pagi, 05.00.', t: 300, sky: 'pagi', glow: 'hour' },
     { text: 'Putaran kedua dari siang sampai tengah malam. Angkanya diteruskan: 13, 14, sampai 23.', t: 780, sky: 'siang', glow: 'hour' },
-    { text: 'Caranya: tambah 12. Jam tiga sore itu 3 + 12 = 15, ditulis 15.00.', t: 900, sky: 'sore', glow: 'hour', mark: [3] },
+    { text: 'Jam dua belas siang tetap ditulis 12.00, dan jam setengah satu siang ditulis 12.30.', t: 750, sky: 'siang', glow: 'both', mark: [12, 1, 6] },
+    { text: 'Mulai jam satu siang, caranya tambah 12. Jam tiga sore itu 3 + 12 = 15, ditulis 15.00.', t: 900, sky: 'sore', glow: 'hour', mark: [3] },
     { text: 'Pagi: 04.00 sampai 10.59. Siang: 11.00 sampai 14.59. Sore: 15.00 sampai 17.59. Malam: 18.00 sampai 03.59.', t: 900, sky: 'sore' },
     { text: 'Jago makan malam jam tujuh malam: 7 + 12 = 19, ditulis 19.00.', t: 1140, sky: 'malam', glow: 'both', mark: [7] },
     { try: 1260, text: 'Giliranmu! Jago tidur jam sembilan malam, 21.00. Putar jarumnya!' },
@@ -249,9 +250,11 @@ Screens.learn = ({ unit }) => {
     const st = steps[s];
     if (W.samaDiJarum(clock.t, st.try)) {
       Sound.good(); Jago.mood(box, 'happy'); Jago.crow(box);
-      Jago.say(box, `Benar! Itu ${W.kata(st.try)}, ${W.digital(st.try, unit === 'harian' || unit === 'lama')}. Kamu jago!`, Save.data.settings.voice);
+      const is24 = unit === 'harian' || unit === 'lama';
+      Jago.say(box, `Benar! Itu ${W.kata(st.try, { bagian: is24 })}, ${W.digital(st.try, is24)}. Kamu jago!`, Save.data.settings.voice);
       const gained = Save.setStar(unit, 'learn', 3);
-      checkClocks();
+      const fresh = checkClocks();
+      if (fresh.length) setTimeout(() => { Sound.alarm(0.6); UI.toast(`Jam baru: ${ClockSkins[fresh[0]].name}`, 'gold'); }, 900);
       if (gained) UI.toast(`+${gained} bintang!`, 'gold');
       UI.confetti();
       done = true;

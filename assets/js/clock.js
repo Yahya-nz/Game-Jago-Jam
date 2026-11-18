@@ -151,9 +151,11 @@ const Clock = {
       if (m >= 60) m = 0;
       const curM = api.t % 60;
       let h = Math.floor(api.t / 60);
-      // lewat angka 12 ke depan: jam maju; ke belakang: jam mundur
-      if (curM >= 45 && m < 15) h += 1;
-      else if (curM < 15 && m >= 45) h -= 1;
+      // lewat angka 12 ke depan: jam maju; ke belakang: jam mundur.
+      // Pakai jarak terpendek, supaya tarikan cepat (lompat 15+ menit) tetap benar.
+      const diff = m - curM;
+      if (diff < -30) h += 1;
+      else if (diff > 30) h -= 1;
       change(h * 60 + m);
     };
     const moveHour = (deg) => {

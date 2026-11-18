@@ -3,24 +3,25 @@
 
 // kegiatan sehari-hari Jago untuk soal bab Pagi sampai Malam dan Berapa Lama
 const KEGIATAN = [
-  { a: 'Jago bangun dan berkokok', from: [5, 0], to: [5, 45] },
-  { a: 'Jago mandi pagi', from: [5, 30], to: [6, 15] },
-  { a: 'Jago sarapan jagung', from: [6, 0], to: [6, 45] },
-  { a: 'Jago berangkat ke sekolah', from: [6, 30], to: [7, 0] },
-  { a: 'Jago istirahat sekolah', from: [9, 30], to: [10, 0] },
-  { a: 'Jago pulang sekolah', from: [12, 0], to: [13, 0] },
-  { a: 'Jago makan siang', from: [12, 30], to: [13, 30] },
-  { a: 'Jago tidur siang', from: [13, 30], to: [14, 30] },
-  { a: 'Jago main layangan', from: [15, 30], to: [17, 0] },
-  { a: 'Jago mandi sore', from: [16, 30], to: [17, 30] },
-  { a: 'Jago makan malam', from: [18, 30], to: [19, 30] },
-  { a: 'Jago belajar', from: [19, 0], to: [20, 0] },
-  { a: 'Jago tidur', from: [20, 30], to: [21, 30] },
+  { a: 'Jago bangun dan berkokok', from: [5, 0], to: [5, 45], dur: [10, 15, 20] },
+  { a: 'Jago mandi pagi', from: [5, 30], to: [6, 15], dur: [10, 15, 20] },
+  { a: 'Jago sarapan jagung', from: [6, 0], to: [6, 45], dur: [15, 20, 25, 30] },
+  { a: 'Jago berangkat ke sekolah', from: [6, 30], to: [7, 0], dur: [15, 20, 25, 30] },
+  { a: 'Jago istirahat sekolah', from: [9, 30], to: [10, 0], dur: [15, 20, 30] },
+  { a: 'Jago pulang sekolah', from: [12, 0], to: [13, 0], dur: [15, 20, 30] },
+  { a: 'Jago makan siang', from: [12, 30], to: [13, 30], dur: [15, 20, 30] },
+  { a: 'Jago tidur siang', from: [13, 30], to: [14, 30], dur: [30, 45, 60, 90] },
+  { a: 'Jago main layangan', from: [15, 30], to: [17, 0], dur: [30, 45, 60, 75, 90, 120] },
+  { a: 'Jago mandi sore', from: [16, 30], to: [17, 30], dur: [10, 15, 20] },
+  { a: 'Jago makan malam', from: [18, 30], to: [19, 30], dur: [20, 30, 45] },
+  { a: 'Jago belajar', from: [19, 0], to: [20, 0], dur: [30, 45, 60, 90, 120] },
+  { a: 'Jago tidur', from: [20, 30], to: [21, 30], dur: null },
 ];
-const kegiatanAcak = (step = 15) => {
-  const k = pick(KEGIATAN);
+const kegiatanAcak = (step = 15, filter = null) => {
+  const pool = filter ? KEGIATAN.filter(filter) : KEGIATAN;
+  const k = pick(pool);
   const a = k.from[0] * 60 + k.from[1], b = k.to[0] * 60 + k.to[1];
-  return { a: k.a, t: a + Math.floor(Math.random() * ((b - a) / step + 1)) * step };
+  return { a: k.a, t: a + Math.floor(Math.random() * ((b - a) / step + 1)) * step, dur: k.dur };
 };
 
 const Q = {
@@ -94,26 +95,33 @@ const Q = {
   // posisi awal jarum di Putar Jarum: jauh dari jawaban
   startFor(t, snap) {
     let s;
-    do s = W.make(randi(1, 12), randi(0, 59 / snap) * snap); while (Math.abs((s % 720) - (t % 720)) < 60);
+    let dd;
+    do {
+      s = W.make(randi(1, 12), randi(0, Math.floor(59 / snap)) * snap);
+      dd = (((s - t) % 720) + 720) % 720;
+    } while (Math.min(dd, 720 - dd) < 60);
     return s;
   },
 
   makeHarian(kind) {
-    const unit = 'harian';
     const k = kegiatanAcak(15);
-    const q = { unit, kind, t: k.t, snap: 5, act: k.a, sky: W.bagian(k.t) };
+    return Q.makeHarianAt(kind, k.a, k.t);
+  },
+  makeHarianAt(kind, act, t) {
+    const unit = 'harian';
+    const q = { unit, kind, t, snap: 5, act, sky: W.bagian(t) };
     if (kind === 'read') {
-      const opts = [k.t, k.t + 720, k.t + 60, k.t + 720 - 60].map((x) => ((x % 1440) + 1440) % 1440);
-      q.prompt = `${k.a}. Pukul berapa sekarang?`;
-      q.say = `${k.a}. Pukul berapa sekarang? Lihat langitnya ya.`;
-      q.opts = shuffle(opts).map((x) => ({ t: x, big: W.digital(x), small: cap(W.kata(x, { bagian: true })), ok: x === k.t }));
+      const opts = [t, t + 720, t + 60, t + 720 - 60].map((x) => ((x % 1440) + 1440) % 1440);
+      q.prompt = `${act}. Pukul berapa sekarang?`;
+      q.say = `${act}. Pukul berapa sekarang? Lihat langitnya ya.`;
+      q.opts = shuffle(opts).map((x) => ({ t: x, big: W.digital(x), small: cap(W.kata(x, { bagian: true })), ok: x === t }));
     } else if (kind === 'set') {
-      q.prompt = `${k.a} pukul ${W.digital(k.t)}`;
-      q.say = `${k.a} pukul ${W.kata(k.t, { bagian: true })}. Putar jarumnya!`;
-      q.start = Q.startFor(k.t, 5);
+      q.prompt = `${act} pukul ${W.digital(t)}`;
+      q.say = `${act} ${W.kata(t, { bagian: true })}. Putar jarumnya!`;
+      q.start = Q.startFor(t, 5);
     } else {
-      q.prompt = `${k.a} ${W.kata(k.t, { bagian: true })}. Tulis pukulnya dalam 24 jam.`;
-      q.say = `${k.a} ${W.kata(k.t, { bagian: true })}. Tulis pukulnya.`;
+      q.prompt = `${act} ${W.kata(t, { bagian: true })}. Tulis pukulnya dalam 24 jam.`;
+      q.say = `${act} ${W.kata(t, { bagian: true })}. Tulis pukulnya.`;
       q.mode24 = true;
       q.hideClock = true;
     }
@@ -121,25 +129,31 @@ const Q = {
   },
 
   makeLama(kind) {
+    // tidur malam terlalu panjang dan melewati tengah malam, jadi nggak dipakai di bab ini
+    for (let k = 0; k < 50; k++) {
+      const g = kegiatanAcak(15, (x) => !!x.dur);
+      const d = pick(g.dur);
+      if (g.t + d < 1440) return Q.makeLamaAt(kind, g.a, g.t, d);
+    }
+    return Q.makeLamaAt(kind, 'Jago belajar', 19 * 60, 60);
+  },
+  makeLamaAt(kind, act, t1, d) {
     const unit = 'lama';
-    const k = kegiatanAcak(15);
-    const durs = kind === 'read' ? [15, 30, 45, 60, 90, 120, 75, 105, 150, 180] : [10, 15, 20, 25, 30, 40, 45, 50, 60, 75, 90, 120];
-    const d = pick(durs);
-    const t1 = k.t, t2 = (k.t + d) % 1440;
-    const q = { unit, kind, t: t2, start: t1, d, snap: 5, act: k.a, sky: W.bagian(t1) };
+    const t2 = (t1 + d) % 1440;
+    const q = { unit, kind, t: t2, start: t1, d, snap: 5, act, sky: W.bagian(t1) };
     if (kind === 'read') {
-      const cand = [d + 15, d - 15, d + 30, d - 30, d + 60, d - 60, 60 - d % 60 + Math.floor(d / 60) * 60].filter((x) => x > 0 && x !== d);
+      const cand = [d + 5, d - 5, d + 10, d - 10, d + 15, d - 15, d + 30, d - 30, d + 60, d - 60].filter((x) => x > 0 && x !== d);
       const opts = [d];
       for (const x of shuffle(cand)) if (opts.length < 4 && !opts.includes(x)) opts.push(x);
-      q.prompt = `${k.a}. Berapa lama?`;
-      q.say = `${k.a} mulai ${W.kata(t1)} sampai ${W.kata(t2)}. Berapa lama?`;
+      q.prompt = `${act}. Berapa lama?`;
+      q.say = `${act} mulai ${W.kata(t1)} sampai ${W.kata(t2)}. Berapa lama?`;
       q.opts = shuffle(opts).map((x) => ({ t: x, big: W.lama(x), small: x % 60 === 30 && x > 60 ? W.lamaKata(x) : '', ok: x === d }));
     } else if (kind === 'set') {
       q.prompt = `Mulai ${W.digital(t1)}, lamanya ${W.lama(d)}. Kapan selesai?`;
-      q.say = `${k.a} mulai ${W.kata(t1)}, lamanya ${W.lamaKata(d)}. Putar jarumnya ke jam selesai!`;
+      q.say = `${act} mulai ${W.kata(t1)}, lamanya ${W.lamaKata(d)}. Putar jarumnya ke jam selesai!`;
     } else {
       q.prompt = `Mulai ${W.digital(t1)}, lamanya ${W.lama(d)}. Selesai pukul berapa?`;
-      q.say = `${k.a} mulai ${W.kata(t1)}, lamanya ${W.lamaKata(d)}. Selesai pukul berapa?`;
+      q.say = `${act} mulai ${W.kata(t1)}, lamanya ${W.lamaKata(d)}. Selesai pukul berapa?`;
       q.mode24 = true;
       q.hideClock = true;
     }
@@ -199,6 +213,7 @@ Screens.play = (params) => {
     Jago.say(jagoBox, q.kind === 'set' ? 'Tarik jarum panjangnya ya!' : q.kind === 'type' ? 'Ketik angkanya!' : 'Pilih yang benar!');
     UI.sky(q.sky || 'pagi');
     const box = $('.clocks', el);
+    const hadFocus = !!(clock && clock.el.contains(document.activeElement));
     box.innerHTML = '';
     if (clock) { clock.destroy(); clock = null; }
     // jam untuk soal Berapa Lama: dua jam (mulai dan selesai)
@@ -211,6 +226,7 @@ Screens.play = (params) => {
     } else if (!q.hideClock) {
       const startT = q.kind === 'set' ? q.start : q.t;
       clock = Clock.create(box, { t: startT, interactive: q.kind === 'set', snap: q.snap, label: 'Jam, putar jarumnya' });
+      if (hadFocus && q.kind === 'set') clock.el.focus({ preventScroll: true });
       if (q.unit === 'harian' && q.kind === 'read') box.insertAdjacentHTML('beforeend', `<div class="sky-badge ${q.sky}">${BAGIAN_ICON[q.sky]}<span>Lihat langitnya</span></div>`);
     } else {
       box.innerHTML = `<div class="scene-card ${q.sky}"><div class="scene-ico">${BAGIAN_ICON[q.sky]}</div><p>${q.act}</p></div>`;
@@ -230,7 +246,7 @@ Screens.play = (params) => {
     } else {
       ans.innerHTML = `<div class="type-box">
         <div class="digits" aria-live="polite" aria-label="Jawaban"><span class="d"></span><span class="d"></span><b>.</b><span class="d"></span><span class="d"></span></div>
-        <p class="hint">${q.mode24 ? 'Pakai jam 24: 13.00 sampai 23.59 buat siang ke malam.' : 'Contoh: setengah delapan ditulis 07.30'}</p>
+        <p class="hint">${q.mode24 ? 'Jam 24: jam 12 siang tetap 12.00, jam 1 siang jadi 13.00, jam 8 malam jadi 20.00.' : 'Contoh: setengah delapan ditulis 07.30'}</p>
         <div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => `<button class="key" data-d="${d}">${d}</button>`).join('')}
           <button class="key erase" data-d="del" aria-label="Hapus">${ICON.erase}</button><button class="key" data-d="0">0</button><button class="key ok" data-d="ok" aria-label="Cek">${ICON.check}</button></div>
       </div>`;
@@ -322,7 +338,8 @@ Screens.play = (params) => {
   const finish = () => {
     $('.progress i', el).style.width = '100%';
     if (params.onDone) { params.onDone({ correct, n, missed }); return; }
-    const stars = mistakes <= 1 ? 3 : mistakes <= 3 ? 2 : 1;
+    const r = correct / n;
+    const stars = r >= 0.8 ? 3 : r >= 0.5 ? 2 : r >= 0.25 ? 1 : 0;
     UI.go('result', { unit, kind, stars, correct, n, missed, mode: params.mode, again: params }, { replace: true });
   };
 
@@ -350,14 +367,15 @@ Screens.play = (params) => {
   return scr;
 };
 
-const weakOf = (q) => ({ u: q.unit, k: q.kind, t: q.t, d: q.d || 0, s: q.start || 0 });
+const weakOf = (q) => ({ u: q.unit, k: q.kind, t: q.t, d: q.d || 0, s: q.start || 0, a: q.act || '' });
 
 // ubah catatan soal salah kembali jadi soal
 function fromWeak(w) {
+  if (w.u === 'harian') return Q.makeHarianAt(w.k, w.a || 'Jago belajar', w.t);
+  if (w.u === 'lama') return Q.makeLamaAt(w.k, w.a || 'Jago belajar', w.s, w.d);
   let q;
   for (let k = 0; k < 30; k++) {
     q = Q.make(w.u, w.k);
-    if (w.u === 'harian' || w.u === 'lama') break;
     if (W.samaDiJarum(q.t, w.t)) break;
   }
   // samakan waktunya dengan soal yang dulu salah (untuk bab 1-5)
@@ -383,7 +401,7 @@ Screens.result = (p) => {
   if (p.mode === 'unit') gained = Save.setStar(p.unit, p.kind, p.stars);
   const fresh = checkClocks();
   const title = p.mode === 'ulang' ? 'Ulangi Soal Salah' : `${ACT_NAME[p.kind]} · ${unitName}`;
-  const lines = p.stars === 3 ? 'Kukuruyuk! Sempurna!' : p.stars === 2 ? 'Bagus! Sedikit lagi sempurna.' : 'Terus latihan, pasti makin jago!';
+  const lines = p.stars === 3 ? 'Kukuruyuk! Hebat sekali!' : p.stars === 2 ? 'Bagus! Sedikit lagi tiga bintang.' : p.stars === 1 ? 'Terus latihan, pasti makin jago!' : 'Ayo coba lagi pelan-pelan. Buka Belajar dulu juga boleh!';
   const el = UI.el(`<section class="screen result">
     ${UI.header(title)}
     <div class="result-card">

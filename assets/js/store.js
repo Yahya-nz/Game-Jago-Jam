@@ -93,12 +93,13 @@ const W = {
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// "07.30" dibaca "pukul tujuh lewat tiga puluh menit", supaya suara baca nggak bilang "nol tujuh titik"
+// "07.30" dibaca "pukul tujuh tiga puluh" seperti orang membaca jam digital,
+// supaya suara baca nggak bilang "nol tujuh titik tiga nol"
 function ucapkan(text) {
   return text.replace(/(?:pukul\s+)?\b(\d{1,2})\.(\d{2})\b/g, (_, hh, mm) => {
     const h = +hh, m = +mm;
     if (h > 23 || m > 59) return _;
-    return 'pukul ' + terbilang(h) + (m ? ' lewat ' + terbilang(m) + ' menit' : '');
+    return 'pukul ' + (h === 0 ? 'nol nol' : terbilang(h)) + (m ? ' ' + terbilang(m) : '');
   });
 }
 
