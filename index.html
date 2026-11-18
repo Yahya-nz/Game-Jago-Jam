@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Game belajar membaca jam untuk anak SD bareng Jago si ayam jago: jam tepat, setengah, seperempat, lima menitan, tiap menit, jam 24, dan lama waktu.">
+  <meta name="theme-color" content="#9fdcff">
+  <title>Jago Jam</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M20 14c-2-8 6-10 8-4 0-8 9-8 8 0 3-6 11-2 6 6z' fill='%23e8413a'/%3E%3Ccircle cx='32' cy='36' r='22' fill='%23fffaf0' stroke='%23c8925a' stroke-width='3'/%3E%3Cpath d='M32 36V22M32 36l9 5' stroke='%232d3436' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M27 46h10l-5 7z' fill='%23ffb93b'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-sky="pagi">
+  <!-- latar peternakan: langitnya ikut bagian hari -->
+  <div id="bg" aria-hidden="true">
+    <div class="sky"></div>
+    <div class="stars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="sun"></div>
+    <div class="moon"></div>
+    <i class="cloud c1"></i><i class="cloud c2"></i><i class="cloud c3"></i>
+    <svg class="hills" viewBox="0 0 1200 220" preserveAspectRatio="none">
+      <path class="hill-far" d="M0 120 Q160 40 340 100 T700 80 T1000 70 T1200 90 V220 H0Z"/>
+      <path class="hill-near" d="M0 160 Q220 100 460 150 T900 140 T1200 150 V220 H0Z"/>
+    </svg>
+    <svg class="barn" viewBox="0 0 220 210">
+      <path d="M10 92 L110 18 L210 92 Z" fill="#b8402f" stroke="#7d2a1f" stroke-width="5" stroke-linejoin="round"/>
+      <rect x="28" y="88" width="164" height="118" fill="#d4523d" stroke="#7d2a1f" stroke-width="5"/>
+      <path d="M28 120 H192 M28 152 H192" stroke="#b8402f" stroke-width="3"/>
+      <rect x="78" y="128" width="64" height="78" fill="#f5e6c8" stroke="#7d2a1f" stroke-width="4"/>
+      <path d="M78 128 L142 206 M142 128 L78 206" stroke="#7d2a1f" stroke-width="4"/>
+      <g id="barn-clock" transform="translate(110 64)">
+        <circle r="22" fill="#fffaf0" stroke="#7d2a1f" stroke-width="4"/>
+        <circle r="2" cy="-15" fill="#7d2a1f"/><circle r="2" cy="15" fill="#7d2a1f"/><circle r="2" cx="-15" fill="#7d2a1f"/><circle r="2" cx="15" fill="#7d2a1f"/>
+        <path class="bh" d="M0 3 V-10" stroke="#2d3436" stroke-width="3.6" stroke-linecap="round"/>
+        <path class="bm" d="M0 3 V-16" stroke="#d6453d" stroke-width="2.4" stroke-linecap="round"/>
+        <circle r="2.6" fill="#2d3436"/>
+      </g>
+    </svg>
+    <svg class="coop" viewBox="0 0 140 120">
+      <path d="M8 54 L70 10 L132 54 Z" fill="#f2a93b" stroke="#a8691a" stroke-width="4" stroke-linejoin="round"/>
+      <rect x="20" y="50" width="100" height="58" fill="#e8c27a" stroke="#a8691a" stroke-width="4"/>
+      <path d="M52 108 V74 Q70 60 88 74 V108" fill="#7a4a24"/>
+      <path d="M30 108 L22 118 M110 108 L118 118" stroke="#a8691a" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+    <div class="fence"></div>
+    <div class="grass"></div>
+  </div>
+
+  <main id="app"></main>
+  <div id="toasts" aria-live="polite"></div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/sound.js"></script>
+  <script src="assets/js/art.js"></script>
+  <script src="assets/js/clock.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/quiz.js"></script>
+  <script src="assets/js/screens.js"></script>
+  <script src="assets/js/extras.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
